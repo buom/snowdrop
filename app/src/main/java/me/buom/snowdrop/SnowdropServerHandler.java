@@ -8,12 +8,13 @@ import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
 import io.netty.handler.codec.http.*;
 
-import java.nio.charset.StandardCharsets;
-
 import static io.netty.handler.codec.http.HttpHeaderNames.*;
 import static io.netty.handler.codec.http.HttpHeaderValues.KEEP_ALIVE;
 import static io.netty.handler.codec.http.HttpHeaderValues.*;
+import static io.netty.handler.codec.http.HttpMethod.GET;
+import static io.netty.handler.codec.http.HttpResponseStatus.METHOD_NOT_ALLOWED;
 import static io.netty.handler.codec.http.HttpResponseStatus.OK;
+import static java.nio.charset.StandardCharsets.UTF_8;
 import static me.buom.snowdrop.SnowdropServer.EPOCH;
 import static me.buom.snowdrop.SnowdropServer.WORKER_ID;
 
@@ -33,9 +34,11 @@ public class SnowdropServerHandler extends SimpleChannelInboundHandler<HttpObjec
             HttpRequest req = (HttpRequest) msg;
 
             boolean keepAlive = HttpUtil.isKeepAlive(req);
-            long uid = nextId();
-            FullHttpResponse response = new DefaultFullHttpResponse(req.protocolVersion(), OK,
-                    Unpooled.wrappedBuffer(String.valueOf(uid).getBytes(StandardCharsets.UTF_8)));
+            boolean isGet = GET.equals(req.method());
+
+            FullHttpResponse response = new DefaultFullHttpResponse(req.protocolVersion(),
+                    isGet ? OK : METHOD_NOT_ALLOWED,
+                    isGet ? Unpooled.wrappedBuffer(String.valueOf(nextId()).getBytes(UTF_8)) : Unpooled.EMPTY_BUFFER);
             response.headers()
                     .set(CONTENT_TYPE, TEXT_PLAIN)
                     .setInt(CONTENT_LENGTH, response.content().readableBytes());

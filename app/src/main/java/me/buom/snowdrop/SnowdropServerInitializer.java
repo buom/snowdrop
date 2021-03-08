@@ -13,7 +13,6 @@ public class SnowdropServerInitializer extends ChannelInitializer<SocketChannel>
 
     private final SslContext sslCtx;
     private final SnowdropServerHandler handler = new SnowdropServerHandler();
-    private int sequence = 0;
 
     public SnowdropServerInitializer(SslContext sslCtx) {
         this.sslCtx = sslCtx;
@@ -21,7 +20,6 @@ public class SnowdropServerInitializer extends ChannelInitializer<SocketChannel>
 
     @Override
     public void initChannel(SocketChannel ch) {
-        System.err.println("Initializer: " + this.toString() + " " + (sequence++));
         ChannelPipeline p = ch.pipeline();
         if (sslCtx != null) {
             p.addLast(sslCtx.newHandler(ch.alloc()));
